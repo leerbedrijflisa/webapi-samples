@@ -45,6 +45,31 @@ namespace Lisa.Skeleton.Api
             return new CreatedResult(location, result);
         }
 
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> Patch([FromBody] Patch[] patches, int id)
+        {
+            if (patches == null)
+            {
+                return new BadRequestResult();
+            }
+
+            var city = await _database.FetchCityAsync(id);
+            if (city == null)
+            {
+                return new HttpNotFoundResult();
+            }
+
+            var validationResult = _validator.Validate(patches, city);
+            if (validationResult.HasErrors)
+            {
+                return new UnprocessableEntityObjectResult(validationResult.Errors);
+            }
+
+            ModelPatcher.Apply(patches, city);
+            var result = await _database.UpdateCityAsync(city);
+            return new HttpOkObjectResult(result);
+        }
+
         private Database _database = new Database();
         private Validator _validator = new CityValidator();
     }

@@ -11,5 +11,11 @@ namespace Lisa.Skeleton.Api
             NotEmpty("name");
             NotEmpty("country");
         }
+
+        protected override void ValidatePatch()
+        {
+            Allow("country");
+            Allow("population");
+        }
     }
 }

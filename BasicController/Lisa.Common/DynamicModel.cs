@@ -6,6 +6,24 @@ namespace Lisa.Common.WebApi
 {
     public class DynamicModel : DynamicObject
     {
+        public DynamicModel()
+        {
+        }
+
+        private DynamicModel(IDictionary<string, object> properties, object metadata)
+        {
+            _properties = properties;
+            _metadata = metadata;
+        }
+
+        public DynamicModel Copy()
+        {
+            // NOTE: The copy and the original now share their metadata. This is probably not how
+            // it should be, but how do you copy an arbitrary object?
+            var properties = new Dictionary<string, object>(_properties);
+            return new DynamicModel(properties, _metadata);
+        }
+
         public object GetMetadata()
         {
             return _metadata;

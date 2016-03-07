@@ -50,6 +50,23 @@ namespace Lisa.Skeleton.Api
             return result;
         }
 
+        public async Task<DynamicModel> UpdateCityAsync(DynamicModel city)
+        {
+            dynamic after = city;
+
+            foreach (dynamic before in _cities)
+            {
+                if (before.Id == after.Id)
+                {
+                    before.Name = after.Name;
+                    before.Country = after.Country;
+                    before.Population = after.Population;
+                }
+            }
+
+            return after;
+        }
+
         private static void CreateCities()
         {
             dynamic city = new DynamicModel();

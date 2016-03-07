@@ -12,10 +12,46 @@
             return Result;
         }
 
+        public ValidationResult Validate(Patch[] patches, DynamicModel model)
+        {
+            Model = model;
+
+            foreach (var patch in patches)
+            {
+                _isAllowed = false;
+                Patch = patch;
+                ValidatePatch();
+
+                if (!_isAllowed)
+                {
+                    var error = new Error
+                    {
+                        Code = 684257,
+                        Message = $"The field '{patch.Field}' is not patchable.",
+                        Values = new
+                        {
+                            Field = patch.Field
+                        }
+                    };
+                    Result.Errors.Add(error);
+                }
+            }
+
+            Model = model.Copy();
+            ModelPatcher.Apply(patches, Model);
+            ValidateModel();
+
+            Model = null;
+            Patch = null;
+            return Result;
+        }
+
         protected ValidationResult Result { get; private set; } = new ValidationResult();
         protected DynamicModel Model { get; private set; }
+        protected Patch Patch { get; private set; }
 
         protected abstract void ValidateModel();
+        protected abstract void ValidatePatch();
 
         protected void Required(string fieldName)
         {
@@ -57,5 +93,15 @@
                 Result.Errors.Add(error);
             }
         }
+
+        protected void Allow(string fieldName)
+        {
+            if (Patch.Field == fieldName)
+            {
+                _isAllowed = true;
+            }
+        }
+
+        private bool _isAllowed;
     }
 }
