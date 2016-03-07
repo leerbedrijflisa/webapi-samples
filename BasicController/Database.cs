@@ -1,4 +1,5 @@
 ﻿using Lisa.Common.WebApi;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,6 +36,20 @@ namespace Lisa.Skeleton.Api
             return null;
         }
 
+        // When you create a city, CreateCityAsync() assigns it a randomly generated ID. It is
+        // possible that two cities get the same ID this way, which leads to subtle bugs I don't
+        // care about. It's only a dummy, you know.
+        public async Task<DynamicModel> CreateCityAsync(DynamicModel city)
+        {
+            var random = new Random();
+
+            dynamic result = city;
+            result.Id = random.Next(1, 1000);
+            _cities.Add(result);
+
+            return result;
+        }
+
         private static void CreateCities()
         {
             dynamic city = new DynamicModel();
@@ -44,14 +59,14 @@ namespace Lisa.Skeleton.Api
             city.Population = 1330235;
             _cities.Add(city);
 
-            city = city = new DynamicModel();
+            city = new DynamicModel();
             city.Id = 91;
             city.Name = "London";
             city.Country = "United Kingdom";
             city.Population = 9787426;
             _cities.Add(city);
 
-            city = city = new DynamicModel();
+            city = new DynamicModel();
             city.Id = 71;
             city.Name = "Athens";
             city.Country = "Greece";
