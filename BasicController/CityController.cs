@@ -29,11 +29,18 @@ namespace Lisa.Skeleton.Api
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] DynamicModel city)
         {
+            var validationResult = _validator.Validate(city);
+            if (validationResult.HasErrors)
+            {
+                return new UnprocessableEntityObjectResult(validationResult.Errors);
+            }
+
             dynamic result = await _database.CreateCityAsync(city);
             string location = Url.RouteUrl("SingleCity", new { id = result.Id }, Request.Scheme);
             return new CreatedResult(location, result);
         }
 
         private Database _database = new Database();
+        private Validator _validator = new CityValidator();
     }
 }
