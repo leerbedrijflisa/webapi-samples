@@ -29,6 +29,11 @@ namespace Lisa.Skeleton.Api
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] DynamicModel city)
         {
+            if (city == null)
+            {
+                return new BadRequestResult();
+            }
+
             var validationResult = _validator.Validate(city);
             if (validationResult.HasErrors)
             {
