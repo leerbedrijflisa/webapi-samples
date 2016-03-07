@@ -22,24 +22,37 @@ namespace Lisa.Skeleton.Api
             return _cities;
         }
 
+        public async Task<DynamicModel> FetchCityAsync(int id)
+        {
+            foreach (dynamic city in _cities)
+            {
+                if (city.Id == id)
+                {
+                    return city;
+                }
+            }
+
+            return null;
+        }
+
         private static void CreateCities()
         {
             dynamic city = new DynamicModel();
-            city.Id = 68134;
+            city.Id = 68;
             city.Name = "Amsterdam";
             city.Country = "The Netherlands";
             city.Population = 1330235;
             _cities.Add(city);
 
             city = city = new DynamicModel();
-            city.Id = 91273;
+            city.Id = 91;
             city.Name = "London";
             city.Country = "United Kingdom";
             city.Population = 9787426;
             _cities.Add(city);
 
             city = city = new DynamicModel();
-            city.Id = 71631;
+            city.Id = 71;
             city.Name = "Athens";
             city.Country = "Greece";
             city.Population = 3090508;

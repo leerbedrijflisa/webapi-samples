@@ -13,6 +13,13 @@ namespace Lisa.Skeleton.Api
             return new HttpOkObjectResult(cities);
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult> Get(int id)
+        {
+            var city = await _database.FetchCityAsync(id);
+            return new HttpOkObjectResult(city);
+        }
+
         private Database _database = new Database();
     }
 }
