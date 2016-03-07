@@ -17,6 +17,11 @@ namespace Lisa.Skeleton.Api
         public async Task<ActionResult> Get(int id)
         {
             var city = await _database.FetchCityAsync(id);
+            if (city == null)
+            {
+                return new HttpNotFoundResult();
+            }
+
             return new HttpOkObjectResult(city);
         }
 
