@@ -1,4 +1,7 @@
-﻿namespace Lisa.Common.WebApi
+﻿using System;
+using System.Collections.Generic;
+
+namespace Lisa.Common.WebApi
 {
     public abstract class Validator
     {
@@ -6,7 +9,11 @@
         {
             Model = model;
 
-            ValidateModel();
+            foreach (var property in model.Properties)
+            {
+                Property = property;
+                ValidateModel();
+            }
 
             Model = null;
             return Result;
@@ -39,7 +46,9 @@
 
             Model = model.Copy();
             ModelPatcher.Apply(patches, Model);
-            ValidateModel();
+            Validate(Model);    // NOTE: This call sets Model to null at the end. It doesn't
+                                // matter, because the next line does the same, but if that ever
+                                // changes, you need to fix this.
 
             Model = null;
             Patch = null;
@@ -49,35 +58,35 @@
         protected ValidationResult Result { get; private set; } = new ValidationResult();
         protected DynamicModel Model { get; private set; }
         protected Patch Patch { get; private set; }
+        protected KeyValuePair<string, object> Property { get; private set; }
 
         protected abstract void ValidateModel();
         protected abstract void ValidatePatch();
 
-        protected void Required(string fieldName)
+        protected void Required(string fieldName, params Action<string, object>[] validations)
         {
-            if (!Model.ContainsField(fieldName))
+            if (Property.Key == fieldName)
             {
-                var error = new Error
+                foreach (var validation in validations)
                 {
-                    Code = 557385,
-                    Message = $"The field '{fieldName}' is required.",
-                    Values = new
-                    {
-                        Field = fieldName
-                    }
-                };
-                Result.Errors.Add(error);
+                    validation(Property.Key, Property.Value);
+                }
             }
         }
 
-        protected void NotEmpty(string fieldName)
+        protected void Optional(string fieldName, params Action<string, object>[] validations)
         {
-            if (!Model.ContainsField(fieldName))
+            if (Property.Key == fieldName)
             {
-                return;
+                foreach (var validation in validations)
+                {
+                    validation(Property.Key, Property.Value);
+                }
             }
+        }
 
-            var value = Model.GetValue(fieldName);
+        protected void NotEmpty(string fieldName, object value)
+        {
             if ((value == null) ||
                 (value is string) && (string.IsNullOrWhiteSpace((string) value)))
             {

@@ -7,9 +7,8 @@ namespace Lisa.Skeleton.Api
     {
         protected override void ValidateModel()
         {
-            Required("name");
-            NotEmpty("name");
-            NotEmpty("country");
+            Required("name", NotEmpty);
+            Optional("country", NotEmpty);
         }
 
         protected override void ValidatePatch()

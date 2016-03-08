@@ -89,6 +89,14 @@ namespace Lisa.Common.WebApi
             return true;
         }
 
+        internal IEnumerable<KeyValuePair<string, object>> Properties
+        {
+            get
+            {
+                return _properties;
+            }
+        }
+
         private object _metadata;
         private IDictionary<string, object> _properties = new Dictionary<string, object>();
     }
