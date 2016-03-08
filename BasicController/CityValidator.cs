@@ -1,5 +1,4 @@
-﻿using System;
-using Lisa.Common.WebApi;
+﻿using Lisa.Common.WebApi;
 
 namespace Lisa.Skeleton.Api
 {

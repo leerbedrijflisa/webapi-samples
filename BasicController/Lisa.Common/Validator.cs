@@ -8,11 +8,30 @@ namespace Lisa.Common.WebApi
         public ValidationResult Validate(DynamicModel model)
         {
             Model = model;
+            _requiredFields = new Dictionary<string, bool>();
 
             foreach (var property in model.Properties)
             {
                 Property = property;
+
                 ValidateModel();
+            }
+
+            foreach (var requiredField in _requiredFields)
+            {
+                if (requiredField.Value == false)
+                {
+                    var error = new Error
+                    {
+                        Code = 548456,
+                        Message = $"The field '{requiredField.Key}' is required.",
+                        Values = new
+                        {
+                            Field = requiredField.Key
+                        }
+                    };
+                    Result.Errors.Add(error);
+                }
             }
 
             Model = null;
@@ -65,8 +84,15 @@ namespace Lisa.Common.WebApi
 
         protected void Required(string fieldName, params Action<string, object>[] validations)
         {
+            if (!_requiredFields.ContainsKey(fieldName))
+            {
+                _requiredFields[fieldName] = false;
+            }
+
             if (Property.Key == fieldName)
             {
+                _requiredFields[fieldName] = true;
+
                 foreach (var validation in validations)
                 {
                     validation(Property.Key, Property.Value);
@@ -112,5 +138,6 @@ namespace Lisa.Common.WebApi
         }
 
         private bool _isAllowed;
+        private Dictionary<string, bool> _requiredFields;
     }
 }
