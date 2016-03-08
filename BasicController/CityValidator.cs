@@ -8,6 +8,7 @@ namespace Lisa.Skeleton.Api
         {
             Required("name", NotEmpty);
             Optional("country", NotEmpty);
+            Optional("population");
         }
 
         protected override void ValidatePatch()

@@ -8,26 +8,40 @@ namespace Lisa.Common.WebApi
         public ValidationResult Validate(DynamicModel model)
         {
             Model = model;
-            _requiredFields = new Dictionary<string, bool>();
+            _fields = new Dictionary<string, FieldType>();
 
             foreach (var property in model.Properties)
             {
                 Property = property;
 
                 ValidateModel();
+
+                if (!_fields.ContainsKey(property.Key))
+                {
+                    var error = new Error
+                    {
+                        Code = 954374,
+                        Message = $"'{property.Key}' is not a valid field.",
+                        Values = new
+                        {
+                            Field = property.Key
+                        }
+                    };
+                    Result.Errors.Add(error);
+                }
             }
 
-            foreach (var requiredField in _requiredFields)
+            foreach (var field in _fields)
             {
-                if (requiredField.Value == false)
+                if (field.Value == FieldType.Missing)
                 {
                     var error = new Error
                     {
                         Code = 548456,
-                        Message = $"The field '{requiredField.Key}' is required.",
+                        Message = $"The field '{field.Key}' is required.",
                         Values = new
                         {
-                            Field = requiredField.Key
+                            Field = field.Key
                         }
                     };
                     Result.Errors.Add(error);
@@ -84,14 +98,14 @@ namespace Lisa.Common.WebApi
 
         protected void Required(string fieldName, params Action<string, object>[] validations)
         {
-            if (!_requiredFields.ContainsKey(fieldName))
+            if (!_fields.ContainsKey(fieldName))
             {
-                _requiredFields[fieldName] = false;
+                _fields[fieldName] = FieldType.Missing;
             }
 
             if (Property.Key == fieldName)
             {
-                _requiredFields[fieldName] = true;
+                _fields[fieldName] = FieldType.Required;
 
                 foreach (var validation in validations)
                 {
@@ -102,6 +116,11 @@ namespace Lisa.Common.WebApi
 
         protected void Optional(string fieldName, params Action<string, object>[] validations)
         {
+            if (!_fields.ContainsKey(fieldName))
+            {
+                _fields[fieldName] = FieldType.Optional;
+            }
+
             if (Property.Key == fieldName)
             {
                 foreach (var validation in validations)
@@ -138,6 +157,13 @@ namespace Lisa.Common.WebApi
         }
 
         private bool _isAllowed;
-        private Dictionary<string, bool> _requiredFields;
+        private Dictionary<string, FieldType> _fields;
+
+        private enum FieldType
+        {
+            Missing,
+            Required,
+            Optional
+        }
     }
 }
